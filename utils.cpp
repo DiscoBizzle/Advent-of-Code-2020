@@ -12,6 +12,13 @@ typedef uint32_t u32;
 typedef int64_t i64;
 typedef uint64_t u64;
 
+void printBinary(u32 n) {
+	for (i32 i = 31; i >= 0; i--) {
+		u32 bit = (n & 1<<i) >> i;
+		printf("%u", bit);
+	}
+}
+
 struct Input {
 	char *data;
 	char *cursor;
@@ -113,6 +120,19 @@ std::string_view getStringUntilByte(Input *input, std::initializer_list<char> sk
 	return str;
 }
 
+std::string_view getStringUntilString(Input *input, const char* string) {
+	char *found = strstr(input->cursor, string);
+	if (found != NULL) {
+		u64 len = (found - input->cursor);
+		std::string_view result(input->cursor, len);
+		input->cursor = found;
+		return result;
+	} else {
+		printf("Error in getStringUntilString, couldn't find string \"%s\".", string);
+		assert(false);
+	}
+}
+
 void skipChars(Input *input, std::initializer_list<char> l) {
 	while (std::find(l.begin(), l.end(), *input->cursor) != l.end()) {
 		input->cursor++;
@@ -128,6 +148,10 @@ void expectStr(Input *input, const char *expectedString) {
 		input->cursor += strlen(expectedString);
 	}
 } 
+
+bool isStr(Input *input, const char *queryString) {
+	return (strncmp(input->cursor, queryString, strlen(queryString)) == 0);
+}
 
 std::string_view getAlphaNumString(Input *input) {
 	u64 len = 0;
