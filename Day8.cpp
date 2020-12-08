@@ -90,6 +90,10 @@ bool hasLoop(std::vector<Instruction>& instructions) {
 	}
 }
 
+InstructionType swapNopAndJmp(InstructionType in) {
+	return (InstructionType)(2-(i32)in);
+}
+
 i32 main(i32 argc, char const *argv[]) {
 	auto begin = std::chrono::high_resolution_clock::now();
 	auto input = loadInput("Day8_input.txt");
@@ -105,18 +109,20 @@ i32 main(i32 argc, char const *argv[]) {
 	}
 
 	// part 1 - run unmodified
+	printf("part 1: ");
 	hasLoop(instructions);
+	printf("\n");
 
-	// part 2 - find a jump instruction that, when turned into a nop, allows program to finish
+	// part 2 - find a jump instruction that, when turned into a nop (or vice-versa), allows program to finish
 	for (auto& i: instructions) {
-		if (i.type != JMP) {
+		if (i.type != JMP && i.type != NOP) {
 			continue;
 		}
-		i.type = NOP;
+		i.type = swapNopAndJmp(i.type);
 		if (!hasLoop(instructions)) {
 			break;
 		}
-		i.type = JMP;
+		i.type = swapNopAndJmp(i.type);
 	}
 
 	auto end = std::chrono::high_resolution_clock::now();
