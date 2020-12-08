@@ -93,12 +93,29 @@ void expectByte(Input *input, char expected) {
 	input->cursor++;
 }
 
+u64 countByte(Input input, u8 byte) {
+	u64 count = 0;
+	while (input.cursor != input.end) {
+		count += (*input.cursor == byte);
+		input.cursor++;
+	}
+	return count;
+}
+
 i32 getInt(Input *input) {
-	if (!('0' <= *input->cursor && *input->cursor <= '9')) {
+	if (!(('0' <= *input->cursor && *input->cursor <= '9') || *input->cursor == '+' || *input->cursor == '-')) {
 		u64 position = input->cursor-input->data; 
 		printf("Requested i32. Byte at %llu is %02x, (%c).\n", position, *input->cursor, *input->cursor);
 		assert(false);
 		return 0;
+	}
+	i32 sign = 1;
+	if (*input->cursor == '+') {
+		input->cursor++;
+		sign = 1;
+	} else if (*input->cursor == '-') {
+		input->cursor++;
+		sign = -1;
 	}
 
 	i32 number = 0;
@@ -107,7 +124,7 @@ i32 getInt(Input *input) {
 		number += (*input->cursor-'0');
 		input->cursor++;
 	}
-	return number;
+	return sign*number;
 }
 
 std::string_view getStringUntilByte(Input *input, std::initializer_list<char> skip) {
@@ -201,6 +218,13 @@ struct Grid {
 	u32 w, h, stride, offsetX, offsetY;
 	char *data;
 
+	// Grid()
+	// : w(0), h(0), stride(0), offsetX(0), offsetY(0), data(0) {
+	// }
+
+	Grid()
+	: Grid(0,0,0,0) {}
+
 	Grid(u32 _w, u32 _h, u32 _offsetX, u32 _offsetY)
 	: w(_w), h(_h), stride(_w), offsetX(_offsetX), offsetY(_offsetY) {
 		data = (char*)calloc(w*h, sizeof(char));
@@ -210,7 +234,7 @@ struct Grid {
 	// : w(0), h(0), 
 	// data(_data)
 
-	~Grid() { free(data); }
+	// ~Grid() { if (data) {free(data);} }
 
 	void insert(i32 x, i32 y, char val) {
 		data[(offsetX + x) + w*(offsetY + y)] = val;
