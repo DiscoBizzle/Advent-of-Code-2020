@@ -28,6 +28,9 @@ struct Input {
 
 Input loadInput(const char *fileName) {
 	FILE* fileHandle = fopen(fileName, "r");
+	if (fileHandle == NULL) {
+		printf("Unable to load file \"%s\"!\n", fileName);
+	}
 	fseek(fileHandle, 0, SEEK_END);
     
     Input input;
@@ -207,12 +210,29 @@ struct vec2 {
 	vec2 operator+(vec2 b) {
 		return vec2{x+b.x, y+b.y};
 	}
+	vec2 operator*(i32 b) {
+		return vec2{b*x, b*y};
+	}
 	vec2& operator+=(vec2 b) {
 		x += b.x;
 		y += b.y;
 		return *this;
 	}
 };
+
+void rotateClockwise(vec2 *vec, i64 angle) {
+	while (angle > 0) {
+		*vec = vec2{vec->y, -vec->x};
+		angle -= 90;
+	}
+}
+
+void rotateAntiClockwise(vec2 *vec, i64 angle) {
+	while (angle > 0) {
+		*vec = vec2{-vec->y, vec->x};
+		angle -= 90;
+	}
+}
 
 struct Grid {
 	u32 w, h, stride, offsetX, offsetY;
